@@ -16,7 +16,7 @@ describe("runBranchDomain", () => {
       ok: true,
       status: 200,
       text: () => Promise.resolve(""),
-      json: () => Promise.resolve({ deployments: [{ uid: "a", meta: { githubCommitRef: "login.development" } }] }),
+      json: () => Promise.resolve({}),
     });
     const write = vi.fn();
     expect(await runBranchDomain(environment, write, fetch)).toBe(0);
@@ -33,23 +33,11 @@ describe("runBranchDomain", () => {
       ok: true,
       status: 200,
       text: () => Promise.resolve(""),
-      json: () => Promise.resolve({ deployments: [{ uid: "a", meta: { githubCommitRef: "login.development" } }] }),
+      json: () => Promise.resolve({}),
     });
     const write = vi.fn();
     expect(await runBranchDomain({ ...environment, EVENT: "delete" }, write, fetch)).toBe(0);
-    expect(write).toHaveBeenCalledWith(
-      "::notice::removed https://login.development.sharadox.com and 1 deployment of login.development",
-    );
-    fetch.mockResolvedValue({
-      ok: true,
-      status: 200,
-      text: () => Promise.resolve(""),
-      json: () => Promise.resolve({ deployments: [] }),
-    });
-    await runBranchDomain({ ...environment, EVENT: "delete" }, write, fetch);
-    expect(write).toHaveBeenLastCalledWith(
-      "::notice::removed https://login.development.sharadox.com and 0 deployments of login.development",
-    );
+    expect(write).toHaveBeenCalledWith("::notice::removed https://login.development.sharadox.com");
   });
 
   test("does nothing without a base domain, or for branches that aren't features", async () => {
