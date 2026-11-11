@@ -33,7 +33,14 @@ runs:
     - name: Install the browser
       if: inputs.browser == 'true'
       shell: bash
-      run: pnpm exec playwright install --with-deps chromium
+      # The runner's package mirrors sometimes fail to resolve for a minute; retry before failing the build.
+      run: |
+        for attempt in 1 2 3; do
+          pnpm exec playwright install --with-deps chromium && exit 0
+          echo "::warning::Browser install failed (attempt $attempt of 3); retrying."
+          sleep $((attempt * 30))
+        done
+        exit 1
     - name: Run the checks
       shell: bash
       env:
