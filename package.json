@@ -1,0 +1,71 @@
+{
+  "name": "@sharadox/git-hub-action-library",
+  "version": "0.1.0",
+  "description": "Reusable GitHub Actions for the Sharadox branch flow (index, development, <feature>.development): branch-name checks, verification with pnpm and Turborepo, branch domains on Vercel and npm publishing.",
+  "private": false,
+  "license": "SEE LICENSE IN LICENCA.md",
+  "author": "Sharadox <contact@sharadox.com>",
+  "type": "module",
+  "exports": {
+    "./*/type": {
+      "sharadox-source": "./source/*/type.ts",
+      "types": "./distribution/*/type.d.ts"
+    },
+    "./*": {
+      "sharadox-source": "./source/*/index.ts",
+      "types": "./distribution/*/index.d.ts",
+      "default": "./distribution/*/index.js"
+    }
+  },
+  "files": [
+    "distribution",
+    "LICENCA.md",
+    "LICENSE.md",
+    "NOTICE.md"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rm -rf distribution && tsc -p tsconfig.build.json",
+    "lint": "eslint --max-warnings=0 .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "type-check": "tsc --noEmit",
+    "test:unit": "vitest run --coverage",
+    "documentation": "typedoc",
+    "verify": "turbo run format:check lint type-check test:unit build",
+    "prepare": "husky || true"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs,cjs}": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ],
+    "*.{json,md,yml,yaml}": "prettier --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sharadox/git-hub-action-library.git"
+  },
+  "homepage": "https://github.com/Sharadox/git-hub-action-library#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.19.2",
+    "@vitest/coverage-v8": "^5.1.0",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.10",
+    "typedoc": "^0.28.20",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  }
+}

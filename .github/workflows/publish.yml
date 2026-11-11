@@ -1,0 +1,20 @@
+name: Publish
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+  id-token: write
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./publish
+        with:
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
+          turborepo-team: ${{ vars.TURBOREPO_TEAM }}
+          turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}

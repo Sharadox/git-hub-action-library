@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: development
+    schedule: { interval: weekly }
+    groups:
+      minor-and-patch: { update-types: [minor, patch] }
+    ignore:
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directories: ["/", "/branch-flow", "/branch-domain", "/verify", "/publish"]
+    target-branch: development
+    schedule: { interval: monthly }

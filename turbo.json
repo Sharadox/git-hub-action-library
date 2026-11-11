@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "remoteCache": { "signature": true },
+  "tasks": {
+    "format:check": {},
+    "lint": { "inputs": ["source/**", "*.ts", "*.mjs", "eslint.config.mjs", "tsconfig.json"] },
+    "type-check": { "inputs": ["source/**", "*.ts", "tsconfig.json"] },
+    "test:unit": { "inputs": ["source/**", "vitest.config.ts", "tsconfig.json"], "outputs": ["coverage/**"] },
+    "build": { "inputs": ["source/**", "tsconfig*.json"], "outputs": ["distribution/**"] },
+    "documentation": { "inputs": ["source/**", "typedoc.json", "README.md"], "outputs": ["documentation/**"] }
+  }
+}

@@ -1,0 +1,27 @@
+# This repository checks itself with its own actions (local paths), so every change is tested before it's tagged.
+name: Continuous integration
+on:
+  push:
+  pull_request:
+    branches: [index, development]
+concurrency: { group: "${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}", cancel-in-progress: true }
+jobs:
+  branch-flow:
+    name: Branch flow
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./branch-flow
+  verify:
+    name: Verify
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./verify
+        with:
+          turborepo-token: ${{ secrets.TURBOREPO_TOKEN }}
+          turborepo-team: ${{ vars.TURBOREPO_TEAM }}
+          turborepo-remote-cache-signature-key: ${{ secrets.TURBOREPO_REMOTE_CACHE_SIGNATURE_KEY }}

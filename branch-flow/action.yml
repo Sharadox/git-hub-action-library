@@ -1,0 +1,22 @@
+name: Branch flow
+description: Checks the branch name and where it merges into (production ← integration ← <feature>.integration).
+inputs:
+  production-branch:
+    description: The production branch.
+    default: index
+  integration-branch:
+    description: The branch features are integrated into before production.
+    default: development
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v7
+      with: { node-version: "lts/*" }
+    - name: Check the branch name and where it merges into
+      shell: bash
+      env:
+        BRANCH: ${{ github.head_ref || github.ref_name }}
+        TARGET: ${{ github.base_ref }}
+        PRODUCTION_BRANCH: ${{ inputs.production-branch }}
+        INTEGRATION_BRANCH: ${{ inputs.integration-branch }}
+      run: node --conditions=sharadox-source "$GITHUB_ACTION_PATH/../source/run-branch-flow/entry/index.ts"

@@ -1,0 +1,20 @@
+# @sharadox/git-hub-action-library
+
+> Reusable GitHub Actions and TypeScript functions for a three-level branch flow: `<feature>.development` → `development` → `index` (production). Branch names double as subdomains.
+
+## Actions (use as job steps; check names stay your job names)
+- `Sharadox/git-hub-action-library/branch-flow@v0.1.0`: fails on branch names outside the flow and wrong merge directions. Inputs: production-branch (index), integration-branch (development).
+- `Sharadox/git-hub-action-library/verify@v0.1.0`: checkout, pnpm install (npm-install-token for private packages), `turbo run <tasks>`. Inputs: tasks, browser ("true" installs Playwright Chromium), npm-install-token, turborepo-token, turborepo-team, turborepo-remote-cache-signature-key.
+- `Sharadox/git-hub-action-library/branch-domain@v0.1.0`: on create/delete of `<feature>.development`, adds/removes `<feature>.development.<base-domain>` on Vercel. Inputs: base-domain (empty = skip), integration-branch, vercel-project-id, vercel-team-id, vercel-token.
+- `Sharadox/git-hub-action-library/publish@v0.1.0`: on tag `v<version>` on production, checks, publishes to npm (Trusted Publishing when npm-token is empty; provenance for public), creates a GitHub release. Job needs `permissions: { contents: write, id-token: write }`.
+
+## Functions (npm: @sharadox/git-hub-action-library)
+- branch: parseBranch(branch, names?) → { kind: "production" | "integration" | "feature" (feature) | "dependabot" | "invalid" }; DEFAULT_BRANCH_NAMES = { production: "index", integration: "development" }
+- branch-flow: checkBranchFlow({ branch, target?, names? }) → string[] problems
+- branch-domain: branchDomain(branch, baseDomain, names?) → string | undefined
+- release-tag: checkReleaseTag({ tag, version, isPrivate, onProduction }) → string[]
+- vercel-domain: updateBranchDomain({ event: "create" | "delete", domain, branch, project, team, token, fetch? })
+- action-output: reportErrors(errors, write) → exit code; reportNotice(message, write)
+
+## Licence
+Sharadox Open Source Licence 0.1.0 (Portuguese original LICENCA.md, English LICENSE.md).

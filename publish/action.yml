@@ -1,0 +1,59 @@
+name: Publish
+description: "Publishes a v<version> tag on the production branch to npm (with provenance when public) and attaches the package to a GitHub release. The calling job needs permissions contents: write and id-token: write."
+inputs:
+  production-branch:
+    description: The branch release tags must be on.
+    default: index
+  tasks:
+    description: Turborepo tasks to run before publishing.
+    default: format:check lint type-check test:unit build
+  npm-token:
+    description: An npm token for this package only. Leave empty to use npm Trusted Publishing (recommended).
+    default: ""
+  turborepo-token:
+    description: Token for the Turborepo remote cache (empty runs without it).
+    default: ""
+  turborepo-team:
+    description: Turborepo team.
+    default: ""
+  turborepo-remote-cache-signature-key:
+    description: Key that signs remote cache artifacts.
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v7
+      with: { fetch-depth: 0 }
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v7
+      with: { node-version-file: .node-version, cache: pnpm, registry-url: "https://registry.npmjs.org" }
+    - name: Check the tag
+      shell: bash
+      env: { TAG: "${{ github.ref_name }}", PRODUCTION_BRANCH: "${{ inputs.production-branch }}" }
+      run: |
+        if git merge-base --is-ancestor "$GITHUB_SHA" "origin/$PRODUCTION_BRANCH"; then export ON_PRODUCTION=true; else export ON_PRODUCTION=false; fi
+        node --conditions=sharadox-source "$GITHUB_ACTION_PATH/../source/run-release-check/entry/index.ts"
+    - name: Install
+      shell: bash
+      env: { HUSKY: "0" }
+      run: pnpm install --frozen-lockfile
+    - name: Run the checks
+      shell: bash
+      env:
+        TASKS: ${{ inputs.tasks }}
+        TURBO_TOKEN: ${{ inputs.turborepo-token }}
+        TURBO_TEAM: ${{ inputs.turborepo-team }}
+        TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ inputs.turborepo-remote-cache-signature-key }}
+      run: pnpm exec turbo run $TASKS
+    - name: Publish to npm
+      shell: bash
+      env: { NODE_AUTH_TOKEN: "${{ inputs.npm-token }}" }
+      run: |
+        npm install --global npm@11 >/dev/null
+        pnpm pack
+        access="$(node -p 'require("./package.json").publishConfig?.access ?? "public"')"
+        if [ "$access" = public ]; then npm publish ./*.tgz --access public --provenance; else npm publish ./*.tgz --access restricted; fi
+    - name: Attach the package to a GitHub release
+      shell: bash
+      env: { GH_TOKEN: "${{ github.token }}", TAG: "${{ github.ref_name }}" }
+      run: gh release create "$TAG" ./*.tgz --title "$TAG" --generate-notes || gh release upload "$TAG" ./*.tgz --clobber

@@ -1,0 +1,49 @@
+name: Verify
+description: Installs the repository with pnpm and runs its checks through Turborepo (remote cache optional).
+inputs:
+  tasks:
+    description: Turborepo tasks to run, separated by spaces.
+    default: format:check lint type-check test:unit build
+  browser:
+    description: '"true" installs Playwright''s Chromium first (for end-to-end tests) and keeps the results on failure.'
+    default: "false"
+  npm-install-token:
+    description: A read-only npm token for private packages (empty when every dependency is public).
+    default: ""
+  turborepo-token:
+    description: Token for the Turborepo remote cache (empty runs without it).
+    default: ""
+  turborepo-team:
+    description: Turborepo team.
+    default: ""
+  turborepo-remote-cache-signature-key:
+    description: Key that signs remote cache artifacts.
+    default: ""
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v7
+    - uses: pnpm/action-setup@v6
+    - uses: actions/setup-node@v7
+      with: { node-version-file: .node-version, cache: pnpm, registry-url: "https://registry.npmjs.org" }
+    - name: Install
+      shell: bash
+      env: { HUSKY: "0", NODE_AUTH_TOKEN: "${{ inputs.npm-install-token }}" }
+      run: pnpm install --frozen-lockfile
+    - name: Install the browser
+      if: inputs.browser == 'true'
+      shell: bash
+      run: pnpm exec playwright install --with-deps chromium
+    - name: Run the checks
+      shell: bash
+      env:
+        TASKS: ${{ inputs.tasks }}
+        TURBO_TOKEN: ${{ inputs.turborepo-token }}
+        TURBO_TEAM: ${{ inputs.turborepo-team }}
+        TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ inputs.turborepo-remote-cache-signature-key }}
+      # Word splitting on purpose: TASKS is a space-separated list of task names.
+      run: pnpm exec turbo run $TASKS
+    - name: Keep the browser test results
+      if: failure() && inputs.browser == 'true'
+      uses: actions/upload-artifact@v7
+      with: { name: playwright, path: "test-results/", retention-days: 7 }
