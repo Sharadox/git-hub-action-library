@@ -16,5 +16,5 @@
 - vercel-domain: updateBranchDomain({ event: "create" | "delete", domain, branch, project, team, token, fetch? })
 - action-output: reportErrors(errors, write) → exit code; reportNotice(message, write)
 
-## Licence
-Sharadox Open Source Licence 0.1.0 (Portuguese original LICENCA.md, English LICENSE.md).
+## License
+Sharadox Open Source License 0.1.0 (Portuguese original LICENCA.md, English LICENSE.md).
