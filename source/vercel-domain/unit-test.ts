@@ -8,7 +8,8 @@ const base = {
   team: "team_1",
   token: "secret",
 };
-const respond = (ok: boolean, body = "") => vi.fn().mockResolvedValue({ ok, text: () => Promise.resolve(body) });
+const respond = (ok: boolean, body = "", status = ok ? 200 : 403) =>
+  vi.fn().mockResolvedValue({ ok, status, text: () => Promise.resolve(body), json: () => Promise.resolve({}) });
 
 describe("updateBranchDomain", () => {
   test("adds the domain for the branch when it is created", async () => {
@@ -37,6 +38,12 @@ describe("updateBranchDomain", () => {
     await expect(updateBranchDomain({ ...base, event: "delete", fetch: respond(false, "missing") })).rejects.toThrow(
       "Vercel refused to remove login.development.sharadox.com: missing",
     );
+  });
+
+  test("a domain already gone counts as removed", async () => {
+    await expect(
+      updateBranchDomain({ ...base, event: "delete", fetch: respond(false, "not found", 404) }),
+    ).resolves.toBeUndefined();
   });
 
   test("uses the global fetch by default", async () => {
