@@ -4,8 +4,7 @@
     "noEmit": false,
     "declaration": true,
     "rootDir": "source",
-    "outDir": "distribution",
-    "customConditions": []
+    "outDir": "distribution"
   },
   "include": ["source/**/*.ts"],
   "exclude": ["source/**/*unit-test.ts"]
