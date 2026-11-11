@@ -3,8 +3,8 @@ import type { BranchDomainUpdate } from "@sharadox/git-hub-action-library/vercel
 const API = "https://api.vercel.com";
 
 /**
- * Adds a domain to a Vercel project, served from one git branch, or removes it. Throws with Vercel's answer when
- * the request is refused.
+ * Adds a domain to a Vercel project, served from one git branch, or removes it (a domain already gone counts as
+ * removed). Throws with Vercel's answer when the request is refused.
  *
  * @example
  * await updateBranchDomain({ event: "create", domain: "login.development.sharadox.com", branch: "login.development",
@@ -30,7 +30,7 @@ export async function updateBranchDomain({
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
-  if (!response.ok) {
+  if (!response.ok && !(event === "delete" && response.status === 404)) {
     throw new Error(`Vercel refused to ${event === "create" ? "add" : "remove"} ${domain}: ${await response.text()}`);
   }
 }
