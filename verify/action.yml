@@ -33,12 +33,14 @@ runs:
     - name: Install the browser
       if: inputs.browser == 'true'
       shell: bash
-      # The runner's package mirrors sometimes fail to resolve for a minute; retry before failing the build.
+      # Ubuntu's package mirrors are sometimes unreachable from the runners for long stretches. The runner image already
+      # has Chrome's system libraries, so without the mirrors Chromium is installed on its own rather than failing.
       run: |
+        timeout 300 pnpm exec playwright install --with-deps chromium && exit 0
+        echo "::warning::System packages unavailable; installing Chromium without them (the runner image has its libraries)."
         for attempt in 1 2 3; do
-          pnpm exec playwright install --with-deps chromium && exit 0
-          echo "::warning::Browser install failed (attempt $attempt of 3); retrying."
-          sleep $((attempt * 30))
+          pnpm exec playwright install chromium && exit 0
+          sleep $((attempt * 15))
         done
         exit 1
     - name: Run the checks
