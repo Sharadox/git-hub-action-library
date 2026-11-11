@@ -3,12 +3,13 @@ import type { Write } from "@sharadox/git-hub-action-library/action-output/type"
 import { DEFAULT_BRANCH_NAMES, parseBranch } from "@sharadox/git-hub-action-library/branch";
 import { branchDomain } from "@sharadox/git-hub-action-library/branch-domain";
 import type { Environment } from "@sharadox/git-hub-action-library/action-output/type";
+import { deleteBranchDeployments } from "@sharadox/git-hub-action-library/vercel-deployment";
 import { updateBranchDomain } from "@sharadox/git-hub-action-library/vercel-domain";
 import type { Fetch } from "@sharadox/git-hub-action-library/vercel-domain/type";
 
 /**
  * The branch-domain action: when a `<feature>.<integration>` branch is created or deleted, adds or removes
- * `<feature>.<integration>.<BASE_DOMAIN>` on the Vercel project. Repositories without a base domain are skipped.
+ * `<feature>.<integration>.<BASE_DOMAIN>` on the Vercel project; a deleted branch's deployments are deleted too. Repositories without a base domain are skipped.
  * Reads `EVENT`, `BRANCH`, `BASE_DOMAIN`, `INTEGRATION_BRANCH`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID` and
  * `VERCEL_TOKEN`. Returns the exit code.
  */
@@ -38,13 +39,17 @@ export async function runBranchDomain(environment: Environment, write: Write, fe
   }
   const domain = branchDomain(branch, baseDomain, names)!;
   const event = environment.EVENT === "delete" ? "delete" : "create";
+  let deleted = 0;
   try {
     await updateBranchDomain({ event, domain, branch, project, team, token, fetch });
+    if (event === "delete") deleted = await deleteBranchDeployments({ branch, project, team, token, fetch });
   } catch (error) {
     return reportErrors([(error as Error).message], write);
   }
   reportNotice(
-    event === "create" ? `${branch} is served on https://${domain} (Vercel team only)` : `removed https://${domain}`,
+    event === "create"
+      ? `${branch} is served on https://${domain} (Vercel team only)`
+      : `removed https://${domain} and ${deleted} deployment${deleted === 1 ? "" : "s"} of ${branch}`,
     write,
   );
   return 0;
