@@ -26,6 +26,21 @@ runs:
     - uses: pnpm/action-setup@v6
     - uses: actions/setup-node@v7
       with: { node-version-file: .node-version, cache: pnpm, registry-url: "https://registry.npmjs.org" }
+    - name: Check package.json engines follows the current Node.js LTS
+      shell: bash
+      # .node-version is lts/*, which moves to each new LTS by itself; Vercel only reads package.json engines. This
+      # fails when they part ways, so the move to a new LTS is made on purpose, everywhere at once.
+      run: |
+        node -e '
+          const lts = Number(process.versions.node.split(".")[0]);
+          const engines = require("./package.json").engines?.node ?? "";
+          const major = Number(engines.match(/\d+/)?.[0]);
+          if (major !== lts) {
+            console.log(`::error::Node.js ${lts} is the current LTS (.node-version: lts/*), but package.json engines.node is "${engines}". Set it to "${lts}.x" (applications) or ">=${lts}" (libraries), and Vercel to ${lts}.x.`);
+            process.exit(1);
+          }
+          console.log(`engines.node "${engines}" follows Node.js ${lts} LTS`);
+        '
     - name: Install
       shell: bash
       env: { HUSKY: "0", NODE_AUTH_TOKEN: "${{ inputs.npm-install-token }}" }

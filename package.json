@@ -1,6 +1,6 @@
 {
   "name": "@sharadox/git-hub-action-library",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Reusable GitHub Actions for the Sharadox branch flow (index, development, <feature>.development): branch-name checks, verification with pnpm and Turborepo, branch domains on Vercel and npm publishing.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",
@@ -24,7 +24,7 @@
     "NOTICE.md"
   ],
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "packageManager": "pnpm@10.34.9",
   "publishConfig": {
