@@ -10,12 +10,12 @@ Reusable GitHub Actions for one branch flow, used by every Sharadox repository a
 - Branch names are subdomains. A repository with a base domain serves `index` on `<domain>`, `development` on `development.<domain>` and `<feature>.development` on `<feature>.development.<domain>`.
 - The production and integration names are inputs, so other teams can use `main` and `staging`.
 
-| Action          | What it does                                                                                                                                                                                                                                                                                       |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `branch-flow`   | Fails when a branch name is outside the flow, or a pull request merges the wrong way.                                                                                                                                                                                                              |
-| `verify`        | Checks out, installs with pnpm (with private packages, using a read-only npm token) and runs Turborepo tasks. It can install Playwright's Chromium (on its own when Ubuntu's package mirrors are unreachable, as the runner image already has its libraries) and keep the test results on failure. |
-| `branch-domain` | On branch create/delete, adds or removes `<feature>.development.<base-domain>` on a Vercel project.                                                                                                                                                                                                |
-| `publish`       | On a `v<version>` tag on production: checks the tag, runs the checks, publishes to npm (provenance for public packages, Trusted Publishing when no token is given) and attaches the package to a GitHub release.                                                                                   |
+| Action          | What it does                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `branch-flow`   | Fails when a branch name is outside the flow, or a pull request merges the wrong way.                                                                                                                                                                                                                                                                                                                  |
+| `verify`        | Checks out, checks that package.json `engines.node` names the current Node.js LTS (`.node-version` is `lts/*`), installs with pnpm (with private packages, using a read-only npm token) and runs Turborepo tasks. It can install Playwright's Chromium (on its own when Ubuntu's package mirrors are unreachable, as the runner image already has its libraries) and keep the test results on failure. |
+| `branch-domain` | On branch create/delete, adds or removes `<feature>.development.<base-domain>` on a Vercel project.                                                                                                                                                                                                                                                                                                    |
+| `publish`       | On a `v<version>` tag on production: checks the tag, runs the checks, publishes to npm (provenance for public packages, Trusted Publishing when no token is given) and attaches the package to a GitHub release.                                                                                                                                                                                       |
 
 The check names stay `Branch flow` and `Verify`, because the actions are steps inside your own jobs, so rulesets requiring those checks keep working.
 
@@ -112,6 +112,6 @@ The actions run the TypeScript directly with the current Node LTS (`--conditions
 
 `pnpm verify` runs formatting, lint, type-check, tests with coverage and the build. This repository checks itself with its own actions (`uses: ./verify`). Releases are `v<version>` tags on `index`.
 
-## Licence
+## License
 
 Licença Sharadox de Código Aberto, versão 0.1.0. See [português](LICENCA.md) (the binding text) and the [English translation](LICENSE.md).
