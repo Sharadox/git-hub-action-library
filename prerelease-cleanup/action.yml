@@ -1,0 +1,27 @@
+name: Prerelease cleanup
+description: "When a <feature>.development branch is deleted, removes the npm dist-tag its prereleases went under (the versions stay, as npm keeps them). development's tag stays."
+inputs:
+  npm-token:
+    description: An npm token allowed to change this package's dist-tags.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with: { node-version-file: .node-version, registry-url: "https://registry.npmjs.org" }
+    - name: Find the branch's tag
+      id: tag
+      shell: bash
+      env: { BRANCH: "${{ github.event.ref }}" }
+      run: node --conditions=sharadox-source "$GITHUB_ACTION_PATH/../source/run-dist-tag/entry/index.ts"
+    - name: Remove it
+      if: steps.tag.outputs.tag != ''
+      shell: bash
+      env:
+        {
+          NODE_AUTH_TOKEN: "${{ inputs.npm-token }}",
+          TAG: "${{ steps.tag.outputs.tag }}",
+          NAME: "${{ steps.tag.outputs.name }}",
+        }
+      run: npm dist-tag rm "$NAME" "$TAG" || echo "No $TAG tag on $NAME."

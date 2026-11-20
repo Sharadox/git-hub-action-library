@@ -7,6 +7,8 @@
 - `Sharadox/git-hub-action-library/verify@v0.1.0`: checkout, pnpm install (npm-install-token for private packages), `turbo run <tasks>`. Inputs: tasks, browser ("true" installs Playwright Chromium), npm-install-token, turborepo-token, turborepo-team, turborepo-remote-cache-signature-key.
 - `Sharadox/git-hub-action-library/branch-domain@v0.1.0`: on create/delete of `<feature>.development`, adds/removes `<feature>.development.<base-domain>` on Vercel. Inputs: base-domain (empty = skip), integration-branch, vercel-project-id, vercel-team-id, vercel-token.
 - `Sharadox/git-hub-action-library/publish@v0.1.0`: on tag `v<version>` on production, checks, publishes to npm (Trusted Publishing when npm-token is empty; provenance for public), creates a GitHub release. Job needs `permissions: { contents: write, id-token: write }`.
+- `Sharadox/git-hub-action-library/prerelease@v0.2.0`: on a push to `development` or `<feature>.development`, writes `<version>-<tag>.<run>` into package.json (tag: `development` or the feature's name; feature names must start with a letter and not be `latest`), runs `turbo run <tasks>` (default build) and publishes under that npm dist-tag (provenance when public). Inputs: tasks, npm-token (empty = Trusted Publishing), turborepo-*. Job needs `permissions: { contents: read, id-token: write }`.
+- `Sharadox/git-hub-action-library/prerelease-cleanup@v0.2.0`: on delete of `<feature>.development`, `npm dist-tag rm <name> <feature>` (versions stay; development's tag stays). Inputs: npm-token.
 
 ## Functions (npm: @sharadox/git-hub-action-library)
 - branch: parseBranch(branch, names?) → { kind: "production" | "integration" | "feature" (feature) | "dependabot" | "invalid" }; DEFAULT_BRANCH_NAMES = { production: "index", integration: "development" }
@@ -15,6 +17,8 @@
 - release-tag: checkReleaseTag({ tag, version, isPrivate, onProduction }) → string[]
 - vercel-domain: updateBranchDomain({ event: "create" | "delete", domain, branch, project, team, token, fetch? })
 - action-output: reportErrors(errors, write) → exit code; reportNotice(message, write)
+- prerelease: distTagOf(branch) → "development" | feature | null (throws for version-like feature names or "latest"); prereleaseOf({ branch, version, run }) → { version: "<version>-<tag>.<run>", tag } | null
+- run-prerelease: runPrerelease(environment, write, files?) (BRANCH, RUN; writes package.json, outputs version, tag, name); runDistTag(environment, write, files?) (BRANCH; outputs tag, name of a deleted feature)
 
 ## License
 Sharadox Open Source License 0.1.0 (Portuguese original LICENCA.md, English LICENSE.md).
