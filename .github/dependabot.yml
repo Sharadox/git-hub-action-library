@@ -12,6 +12,6 @@ updates:
       - dependency-name: "@eslint/js"
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
-    directories: ["/", "/branch-flow", "/branch-domain", "/verify", "/publish"]
+    directories: ["/", "/branch-flow", "/branch-domain", "/verify", "/publish", "/prerelease", "/prerelease-cleanup"]
     target-branch: development
     schedule: { interval: monthly }

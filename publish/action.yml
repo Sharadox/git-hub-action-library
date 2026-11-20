@@ -49,7 +49,7 @@ runs:
       shell: bash
       env: { NODE_AUTH_TOKEN: "${{ inputs.npm-token }}" }
       run: |
-        npm install --global npm@11 >/dev/null
+        npm install --global npm@11.21.2 >/dev/null
         pnpm pack
         access="$(node -p 'require("./package.json").publishConfig?.access ?? "public"')"
         if [ "$access" = public ]; then npm publish ./*.tgz --access public --provenance; else npm publish ./*.tgz --access restricted; fi
