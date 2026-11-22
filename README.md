@@ -110,6 +110,12 @@ branchDomain("login.development", "platform.sharadox.com"); // "login.developmen
 
 The actions run the TypeScript directly with the current Node LTS (`--conditions=sharadox-source`), so there's no build step between a change and a tag. Every function has unit tests at 100% coverage (`pnpm test:unit`).
 
+### Also exported
+
+Smaller parts, mostly building blocks of the main exports:
+
+- `…/run-prerelease`: runPrerelease(environment, write, files?) and runDistTag(environment, write, files?): the prerelease and prerelease-cleanup actions' steps
+
 ## Develop
 
 `pnpm verify` runs formatting, lint, type-check, tests with coverage and the build. This repository checks itself with its own actions (`uses: ./verify`). Releases are `v<version>` tags on `index`.
