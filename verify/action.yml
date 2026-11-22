@@ -25,7 +25,7 @@ runs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
     - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-      with: { node-version-file: .node-version, cache: pnpm, registry-url: "https://registry.npmjs.org" }
+      with: { node-version-file: .node-version, cache: pnpm }
     - name: Check package.json engines follows the current Node.js LTS
       shell: bash
       # .node-version is lts/*, which moves to each new LTS by itself; Vercel only reads package.json engines. This
@@ -44,13 +44,23 @@ runs:
     - name: Install
       shell: bash
       env: { HUSKY: "0", NODE_AUTH_TOKEN: "${{ inputs.npm-install-token }}" }
-      run: pnpm install --frozen-lockfile
+      # The npm token reaches the install alone, through a settings file that is removed right after (on the
+      # self-hosted runner the work folder stays between runs).
+      run: |
+        if [ -z "$NODE_AUTH_TOKEN" ]; then pnpm install --frozen-lockfile; exit; fi
+        settings="$RUNNER_TEMP/install-$GITHUB_RUN_ID.npmrc"
+        printf '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}\n' > "$settings"
+        trap 'rm -f "$settings"' EXIT
+        NPM_CONFIG_USERCONFIG="$settings" pnpm install --frozen-lockfile
     - name: Install the browser
       if: inputs.browser == 'true'
       shell: bash
-      # Ubuntu's package mirrors are sometimes unreachable from the runners for long stretches. The runner image already
-      # has Chrome's system libraries, so without the mirrors Chromium is installed on its own rather than failing.
+      env: { RUNNER_ENVIRONMENT: "${{ runner.environment }}" }
+      # The self-hosted runner has Chrome's system libraries installed once (with sudo, which its user can't use):
+      # only Chromium itself is installed, if missing. On GitHub's runners Ubuntu's package mirrors are sometimes
+      # unreachable for long stretches; their image already has the libraries, so Chromium is then installed alone.
       run: |
+        if [ "$RUNNER_ENVIRONMENT" = self-hosted ]; then pnpm exec playwright install chromium; exit; fi
         timeout 300 pnpm exec playwright install --with-deps chromium && exit 0
         echo "::warning::System packages unavailable; installing Chromium without them (the runner image has its libraries)."
         for attempt in 1 2 3; do
