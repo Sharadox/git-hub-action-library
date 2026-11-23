@@ -1,9 +1,9 @@
 name: Prerelease cleanup
-description: "When a <feature>.development branch is deleted, removes the npm dist-tag its prereleases went under (the versions stay, as npm keeps them). development's tag stays."
+description: "When a <feature>.development branch is deleted, removes the npm dist-tag its prereleases went under (the versions stay, as npm keeps them). development's tag stays. The calling job needs id-token: write for npm Trusted Publishing."
 inputs:
   npm-token:
-    description: An npm token allowed to change this package's dist-tags.
-    required: true
+    description: "An npm token allowed to change this package's dist-tags. Leave empty to use npm Trusted Publishing (its configuration must allow npm dist-tag; the calling job needs id-token: write)."
+    default: ""
 runs:
   using: composite
   steps:
@@ -24,4 +24,6 @@ runs:
           TAG: "${{ steps.tag.outputs.tag }}",
           NAME: "${{ steps.tag.outputs.name }}",
         }
-      run: npm dist-tag rm "$NAME" "$TAG" || echo "No $TAG tag on $NAME."
+      run: |
+        npm install --global npm@11.21.2 >/dev/null
+        npm dist-tag rm "$NAME" "$TAG" || echo "No $TAG tag on $NAME."
