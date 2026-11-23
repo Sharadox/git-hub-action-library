@@ -1,6 +1,6 @@
 {
   "name": "@sharadox/git-hub-action-library",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Reusable GitHub Actions for the Sharadox branch flow (index, development, <feature>.development): branch-name checks, verification with pnpm and Turborepo, branch domains on Vercel and npm publishing.",
   "private": false,
   "license": "SEE LICENSE IN LICENCA.md",
@@ -56,17 +56,17 @@
   "homepage": "https://github.com/Sharadox/git-hub-action-library#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@types/node": "^24.19.2",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.1",
     "eslint": "9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "lint-staged": "^17.6.0",
-    "prettier": "^3.9.10",
-    "turbo": "^2.11.10",
+    "lint-staged": "^17.6.2",
+    "prettier": "^3.10.1",
+    "turbo": "^2.11.13",
     "typedoc": "^0.28.20",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.72.2",
-    "vitest": "^5.1.0"
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
   }
 }
